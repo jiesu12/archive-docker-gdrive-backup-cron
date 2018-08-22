@@ -44,7 +44,7 @@ rm -rf $GDRIVE_WORK_DIR
 mkdir -p $GDRIVE_WORK_DIR
 
 echo "[gdrive backup] Found existing files on gdrive"
-${GDRIVE_CMD} list -m 200 | tail -n +2 | tr -s ' ' | egrep '.*\.7z\.[0-9]+' | cut -d ' ' -f 1,2 | storeExistingFiles
+${GDRIVE_CMD} list -m 200 --name-width 100 | tail -n +2 | tr -s ' ' | egrep '.*\.7z\.[0-9]+' | cut -d ' ' -f 1,2 | storeExistingFiles
 
 echo
 date
