@@ -1,4 +1,5 @@
-FROM jiesu/cron-arm
+ARG arch
+FROM jiesu/cron:${arch}
 
 RUN apk --no-cache add p7zip git
 
