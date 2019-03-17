@@ -44,7 +44,13 @@ rm -rf $GDRIVE_WORK_DIR
 mkdir -p $GDRIVE_WORK_DIR
 
 echo "[gdrive backup] Found existing files on gdrive"
-${GDRIVE_CMD} list -m 200 --name-width 100 | tail -n +2 | tr -s ' ' | egrep '.*\.7z\.[0-9]+' | cut -d ' ' -f 1,2 | storeExistingFiles
+file_list=`${GDRIVE_CMD} list -m 200 --name-width 100`
+if [ "${file_list}" == 'Failed to list files: googleapi: Error 403: Rate Limit Exceeded, rateLimitExceeded' ];then
+  echo "[gdrive backup] Cancel backup because gdrive error - ${file_list}"
+  exit 1
+fi
+
+echo "$file_list" | tail -n +2 | tr -s ' ' | egrep '.*\.7z\.[0-9]+' | cut -d ' ' -f 1,2 | storeExistingFiles
 
 echo
 date
@@ -98,7 +104,6 @@ for repo in `find . -type d -name "*.git"`;do
     echo "[gdrive backup] Upload the repo..."
     ${GDRIVE_CMD} upload ${archive}
     rm ${archive}
-    echo "[gdrive backup] Record the last commit time"
     if [ -f "${idFile}" ];then
       echo "[gdrive backup] Remove old backup from gdrive"
       oldBackupFileId=`cat ${idFile}`
