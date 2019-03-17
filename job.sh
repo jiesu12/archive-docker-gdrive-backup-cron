@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 set -e
 
@@ -45,7 +45,7 @@ mkdir -p $GDRIVE_WORK_DIR
 
 echo "[gdrive backup] Found existing files on gdrive"
 file_list=`${GDRIVE_CMD} list -m 200 --name-width 100`
-if [ "${file_list}" == 'Failed to list files: googleapi: Error 403: Rate Limit Exceeded, rateLimitExceeded' ];then
+if [[ "${file_list}" == Failed* ]];then
   echo "[gdrive backup] Cancel backup because gdrive error - ${file_list}"
   exit 1
 fi
