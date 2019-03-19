@@ -10,5 +10,5 @@ Need two files:
 
 
 ```
-docker run -d -v /path/to/repos:/repos -e FRESH_ENV=true -e PASSWORD_FILE=/path/to/password/file -e SCHEDULE='0 3 * * 1,3,5' --name gdrive-backup jiesu/gdrive-backup-cron:<arch>
+docker run -d -v /path/to/repos:/repos -e PASSWORD_FILE=/path/to/password/file -e SCHEDULE='0 3 * * 1,3,5' --name gdrive-backup jiesu/gdrive-backup-cron:<arch>
 ```
