@@ -2,6 +2,7 @@
 
 set -e
 
+GDRIVE_SERVICE='http://gdrive-service:9000'
 REPO_BASE="/repos"
 GDRIVE_WORK_DIR="/tmp/gdrive"
 SKIP_REPOS="" # space delimited repo names
@@ -9,8 +10,8 @@ SKIP_DIRS="photo old" # space delimited dir names, e.g, "photo old"
 
 function storeExistingFiles {
   while read line;do
-    local id=$(echo $line | cut -f1 -d ' ')
-    local name=$(echo $line | cut -f2 -d ' ')
+    local name=$(echo $line | cut -f1 -d ' ')
+    local id=$(echo $line | cut -f2 -d ' ')
     name=${name/.7z./ }
     local reponame=$(echo $name | cut -f 1 -d' ')
     local updatetime=$(echo $name | cut -f 2 -d' ')
@@ -25,32 +26,19 @@ then
   exit 1
 fi
 
-if [ ! -f ~/.gdrive/token_v2.json ]
-then
-  if [ -f ${REPO_BASE}/token_v2.json ]
-  then
-   mkdir ~/.gdrive
-   cp ${REPO_BASE}/token_v2.json ~/.gdrive 
-  else
-    echo gdrive token file not found
-    echo copy .gdrive/token_v2.json to root of the repos directory
-    exit 1
-  fi
-fi
-
 password=$(cat ${PASSWORD_FILE})
 
 rm -rf $GDRIVE_WORK_DIR
 mkdir -p $GDRIVE_WORK_DIR
 
 echo "[gdrive backup] Found existing files on gdrive"
-file_list=`${GDRIVE_CMD} list -m 200 --name-width 100`
+file_list=$(curl ${GDRIVE_SERVICE})
 if [[ "${file_list}" == Failed* ]];then
   echo "[gdrive backup] Cancel backup because gdrive error - ${file_list}"
   exit 1
 fi
 
-echo "$file_list" | tail -n +2 | tr -s ' ' | egrep '.*\.7z\.[0-9]+' | cut -d ' ' -f 1,2 | storeExistingFiles
+echo "$file_list" | storeExistingFiles
 
 echo
 date
@@ -102,12 +90,12 @@ for repo in `find . -type d -name "*.git"`;do
     archive=${archive}.${lastCommitTime}
     7z a -mhe=on -p${password} ${archive} ${repo} > /dev/null
     echo "[gdrive backup] Upload the repo..."
-    ${GDRIVE_CMD} upload ${archive}
+    curl -F "file=@${archive}" ${GDRIVE_SERVICE}
     rm ${archive}
     if [ -f "${idFile}" ];then
       echo "[gdrive backup] Remove old backup from gdrive"
       oldBackupFileId=`cat ${idFile}`
-      ${GDRIVE_CMD} delete ${oldBackupFileId}
+      curl -X 'DELETE' ${GDRIVE_SERVICE}/${oldBackupFileId}
     fi
   else
     echo "[gdrive backup] No new commit since last backup, will skip gdrive backup"
