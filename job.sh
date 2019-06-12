@@ -88,7 +88,7 @@ for repo in `find . -type d -name "*.git"`;do
     echo "[gdrive backup] compress and encrypt as 7z file"
     cd ${REPO_BASE}
     archive=${archive}.${lastCommitTime}
-    7z a -mhe=on -p${password} ${archive} ${repo} > /dev/null
+    7z a -mhe=on -p${password} ${archive} ${repo}
     echo "[gdrive backup] Upload the repo..."
     curl -F "file=@${archive}" ${GDRIVE_SERVICE}
     rm ${archive}
